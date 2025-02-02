@@ -1,33 +1,72 @@
+import random
 import networkx as nx
 import matplotlib.pyplot as plt
 
-def generate_random_map(num_districts, connection_probability=0.3):
-    """Generates a random map (graph) with districts as nodes and random connections as edges."""
-    G = nx.erdos_renyi_graph(num_districts, connection_probability)
-    while not nx.is_connected(G):  # Ensure the graph is connected
-        G = nx.erdos_renyi_graph(num_districts, connection_probability)
-    return G
+def create_lunar_map(num_districts):
+    """Creates a randomly generated map of Luna-City districts."""
+    adj_list = {i: set() for i in range(num_districts)}
 
-def color_map(G):
-    """Solves the map coloring problem using a greedy coloring approach."""
-    color_assignment = {}
-    for node in sorted(G.nodes(), key=lambda x: len(list(G.neighbors(x))), reverse=True):
-        neighbor_colors = {color_assignment.get(neigh) for neigh in G.neighbors(node)}
-        for color in range(len(G.nodes())):
-            if color not in neighbor_colors:
-                color_assignment[node] = color
+    for i in range(num_districts - 1):
+        adj_list[i].add(i + 1)
+        adj_list[i + 1].add(i)
+
+    for _ in range(num_districts * 2):
+        d1 = random.randint(0, num_districts - 1)
+        d2 = random.randint(0, num_districts - 1)
+        if d1 != d2:
+            adj_list[d1].add(d2)
+            adj_list[d2].add(d1)
+    return adj_list
+
+
+def color_map(adj_list):
+    # ... (same as before)
+    num_districts = len(adj_list)
+    colors = {}
+    available_colors = set(range(1, num_districts + 1))
+
+    for district in range(num_districts):
+        used_colors = set()
+        for neighbor in adj_list[district]:
+            if neighbor in colors:
+                used_colors.add(colors[neighbor])
+
+        for color in available_colors:
+            if color not in used_colors:
+                colors[district] = color
                 break
-    return color_assignment
+        else:
+            return None
 
-def visualize_map(G, color_assignment):
-    """Displays the map with assigned colors."""
-    pos = nx.spring_layout(G)  # Layout for visualization
-    colors = [color_assignment[node] for node in G.nodes()]
-    nx.draw(G, pos, with_labels=True, node_color=colors, cmap=plt.cm.tab10, edge_color='gray', node_size=700)
+    return colors
+
+
+def display_map(adj_list, colors):
+    if colors is None:
+        print("Map is not colorable with this algorithm.")
+        return
+
+    print("District Colors:")
+    for district, color in colors.items():
+        print(f"District {district + 1}: Color {color}")
+
+    # Create and display the graph using NetworkX and Matplotlib
+    graph = nx.Graph(adj_list)  # Create the graph object
+
+    # Node colors based on the coloring
+    node_colors = [colors[node] for node in graph.nodes()]
+
+    # Use a spring layout for better visualization (you can experiment with others)
+    pos = nx.spring_layout(graph, seed=42)  # Seed for consistent layout
+
+    nx.draw(graph, pos, with_labels=True, node_color=node_colors, cmap=plt.cm.get_cmap('viridis'), node_size=600, font_size=10, font_color="white")  # Draw the graph
+    plt.title("Lunar-City Map")
     plt.show()
 
-# Main Execution
-districts = 10  # Number of districts
-random_map = generate_random_map(districts)
-solution = color_map(random_map)
-visualize_map(random_map, solution)
+
+
+# Example usage:
+num_districts = 10
+lunar_map = create_lunar_map(num_districts)
+colored_map = color_map(lunar_map)
+display_map(lunar_map, colored_map)
