@@ -20,7 +20,7 @@ def create_lunar_map(num_districts):
 
 
 def color_map(adj_list):
-    # ... (same as before)
+    
     num_districts = len(adj_list)
     colors = {}
     available_colors = set(range(1, num_districts + 1))
@@ -50,14 +50,14 @@ def display_map(adj_list, colors):
     for district, color in colors.items():
         print(f"District {district + 1}: Color {color}")
 
-    # Create and display the graph using NetworkX and Matplotlib
-    graph = nx.Graph(adj_list)  # Create the graph object
+    
+    graph = nx.Graph(adj_list)  
 
     # Node colors based on the coloring
     node_colors = [colors[node] for node in graph.nodes()]
 
-    # Use a spring layout for better visualization (you can experiment with others)
-    pos = nx.spring_layout(graph, seed=42)  # Seed for consistent layout
+    
+    pos = nx.spring_layout(graph, seed=42)  
 
     nx.draw(graph, pos, with_labels=True, node_color=node_colors, cmap=plt.cm.get_cmap('viridis'), node_size=600, font_size=10, font_color="white")  # Draw the graph
     plt.title("Lunar-City Map")
